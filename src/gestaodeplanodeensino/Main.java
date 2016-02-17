@@ -53,6 +53,9 @@ public class Main {
             case 1:
                 cadastrarDisciplina();
                 break;
+            case 2:
+                listarDisciplinas();
+                break;
                 
             case 6:
                 return;
@@ -115,17 +118,30 @@ public class Main {
         
         Disciplina disciplina = new Disciplina(nome,descricao,cargaHoraria,ementa,bibliografia,0,0);
         salvarDisciplina(disciplina);
+        iniciar();
         
     }
     
-    public static void listaDisciplinas(){
+    public static void listarDisciplinas(){
         if(listaDisciplinas.length() > 0){
+            StringBuilder text  = new StringBuilder();
+            text.append("\n---------------------------------------------------\n");
             for(int i=0; i<listaDisciplinas.length();i++){
-                System.out.println(listaDisciplinas);
+                text.append(i+1).append("ª disciplina");
+                text.append("\nNome: ").append(listaDisciplinas.getJSONObject(i).get(Contract.NOME));
+                text.append("\nCarga horária: ")
+                        .append(listaDisciplinas.getJSONObject(i).get(Contract.CARGA_HORARIA))
+                        .append("h");
+                
+                text.append("\n---------------------------------------------------\n");
             }
+            
+            System.out.println(text.toString());
         }else{
             System.out.println("\n\nNenhuma disciplina cadastrada \n\n");
         }
+        
+        iniciar();
     }
     
     public static JSONArray getAllDisciplinas(){
@@ -171,8 +187,6 @@ public class Main {
             }
         }
         obj.put(Contract.ITENS_DE_EMENTA, itens.toString());
-        
-        System.out.println(itens.toString());
         
         listaDisciplinas.put(obj);
         
