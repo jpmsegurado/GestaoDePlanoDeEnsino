@@ -120,7 +120,9 @@ public class Main {
     
     public static void listaDisciplinas(){
         if(listaDisciplinas.length() > 0){
-            
+            for(int i=0; i<listaDisciplinas.length();i++){
+                System.out.println(listaDisciplinas);
+            }
         }else{
             System.out.println("\n\nNenhuma disciplina cadastrada \n\n");
         }
@@ -213,7 +215,7 @@ public class Main {
     }
     
     public static ArrayList<LivroDeReferencia> retornaBibliografia(){
-        System.out.println("\nCadastando os itens de ementa\n");
+        System.out.println("\nCadastando a bibliografia\n");
         ArrayList<LivroDeReferencia> biblbiografia = new ArrayList<>();
         int comando = -1;
         Scanner scanner = new Scanner(System.in);
