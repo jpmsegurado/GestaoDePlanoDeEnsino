@@ -115,7 +115,7 @@ public class Main {
         
         ArrayList<LivroDeReferencia> bibliografia = retornaBibliografia();
         
-        Disciplina disciplina = new Disciplina(nome,descricao,cargaHoraria,ementa,bibliografia,0,0);
+        Disciplina disciplina = new Disciplina(nome,descricao,cargaHoraria,ementa,bibliografia);
         salvarDisciplina(disciplina);
         iniciar();
         
@@ -207,6 +207,7 @@ public class Main {
                 selecionarItemEmentaEditado(ordem);
                 break;
             case 2:
+                selecionarItemADeletar(ordem);
                 break;
             case 3:
                 break;
@@ -215,6 +216,30 @@ public class Main {
                 break;
         }
     };
+    
+    public static void selecionarItemADeletar(int indiceDisciplina){
+        System.out.println("\nDigite a ordem do item que deseja deletar:\n");
+        int ordem = -1;
+        Scanner scanner = new Scanner(System.in);
+        do{
+            try{
+                ordem = Integer.valueOf(scanner.nextLine());
+            }catch(NumberFormatException e){};
+            if(ordem <= 0){
+                System.out.println("\nPor favor digite um valor válido:\n");
+            }
+        }while(ordem <= 0);
+        JSONObject novaDisciplina = listaDisciplinas.getJSONObject(indiceDisciplina);
+        novaDisciplina.getJSONArray(Contract.ITENS_DE_EMENTA).remove(ordem-1);
+        listaDisciplinas.put(indiceDisciplina, novaDisciplina);
+        regravrarDisciplinas();
+        System.out.println("\nItem removido com sucesso.\n");
+        iniciar();
+    }
+    
+    public static void editarDisciplina(int indiceDisciplina){
+        
+    }
     
     public static void selecionarItemEmentaEditado(int indiceDisciplina){
         JSONObject disciplina = listaDisciplinas.getJSONObject(indiceDisciplina);
@@ -287,6 +312,12 @@ public class Main {
         
         disciplina.getJSONArray(Contract.ITENS_DE_EMENTA).put(indiceItemEmenta, itemEmenta);
         listaDisciplinas.put(indiceDisciplina, disciplina);
+        regravrarDisciplinas();
+        System.out.println("\nAlterado com sucesso\n");
+        iniciar();
+    }
+    
+    public static void regravrarDisciplinas(){
         try {
             PrintWriter out = new PrintWriter("filename.txt");
             out.println(listaDisciplinas.toString());
@@ -294,9 +325,6 @@ public class Main {
         } catch (FileNotFoundException ex) {
             System.out.println(ex.getMessage());
         }
-        
-        System.out.println("\nAlterado com sucesso\n");
-        iniciar();
     }
     
     public static JSONArray getAllDisciplinas(){

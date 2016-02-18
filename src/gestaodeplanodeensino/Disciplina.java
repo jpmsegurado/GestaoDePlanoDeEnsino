@@ -17,17 +17,13 @@ public class Disciplina {
     private int cargaHoraria;
     private ArrayList<ItemDeEmenta> itens;
     private ArrayList<LivroDeReferencia> bibliografia;
-    private int diasPorSemana;
-    private int horasAulaPorDia;
 
-    public Disciplina(String nome, String descricao, int cargaHoraria, ArrayList<ItemDeEmenta> itens, ArrayList<LivroDeReferencia> bibliografia, int diasPorSemana, int horasAulaPorDia) {
+    public Disciplina(String nome, String descricao, int cargaHoraria, ArrayList<ItemDeEmenta> itens, ArrayList<LivroDeReferencia> bibliografia) {
         this.nome = nome;
         this.descricao = descricao;
         this.cargaHoraria = cargaHoraria;
         this.itens = itens;
         this.bibliografia = bibliografia;
-        this.diasPorSemana = diasPorSemana;
-        this.horasAulaPorDia = horasAulaPorDia;
     }
 
     
@@ -46,22 +42,6 @@ public class Disciplina {
 
     public void setBibliografia(ArrayList<LivroDeReferencia> bibliografia) {
         this.bibliografia = bibliografia;
-    }
-
-    public int getDiasPorSemana() {
-        return diasPorSemana;
-    }
-
-    public void setDiasPorSemana(int diasPorSemana) {
-        this.diasPorSemana = diasPorSemana;
-    }
-
-    public int getHorasAulaPorDia() {
-        return horasAulaPorDia;
-    }
-
-    public void setHorasAulaPorDia(int horasAulaPorDia) {
-        this.horasAulaPorDia = horasAulaPorDia;
     }
     
     public String getNome() {
