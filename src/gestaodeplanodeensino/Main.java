@@ -53,9 +53,12 @@ public class Main {
                 cadastrarDisciplina();
                 break;
             case 2:
-                listarDisciplinas();
+                listarDisciplinas(false);
                 break;
                 
+            case 4:
+                listarDisciplinas(true);
+                break;
             case 6:
                 return;
             default:
@@ -121,7 +124,7 @@ public class Main {
         
     }
     
-    public static void listarDisciplinas(){
+    public static void listarDisciplinas(boolean canDelete){
         if(listaDisciplinas.length() > 0){
             StringBuilder text  = new StringBuilder();
             text.append("\n---------------------------------------------------\n");
@@ -132,11 +135,17 @@ public class Main {
                         .append(listaDisciplinas.getJSONObject(i).get(Contract.CARGA_HORARIA))
                         .append("h");
                 
+                text.append("\nDescrição: ").append(listaDisciplinas.getJSONObject(i).get(Contract.DESCRICAO));
+                
                 text.append("\n---------------------------------------------------\n");
             }
             
             System.out.println(text.toString());
-            selecionarDisciplina();
+            if(!canDelete){
+                selecionarDisciplina();
+            }else{
+                deletarDisciplina();
+            }
         }else{
             System.out.println("\n\nNenhuma disciplina cadastrada \n\n");
             iniciar();
@@ -144,6 +153,22 @@ public class Main {
         
         
     }
+    
+    public static void deletarDisciplina(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Qual disciplina deseja deletar(digite o número da ordem):");
+        int ordem = -1;
+        do{
+            try{
+                ordem = Integer.valueOf(scanner.nextLine());
+            }catch(NumberFormatException e){}
+            if(ordem <= 0 || ordem > listaDisciplinas.length()){
+                System.out.println("\nPor favor, digite um valor válido\n");
+            }
+        }while(ordem <= 0 || ordem > listaDisciplinas.length());
+        listaDisciplinas.remove(ordem - 1);
+        regravrarDisciplinas();
+    };
     
     public static void selecionarDisciplina(){
         Scanner scanner = new Scanner(System.in);
@@ -210,6 +235,7 @@ public class Main {
                 selecionarItemADeletar(ordem);
                 break;
             case 3:
+                editarDisciplina(ordem);
                 break;
             case 4:
                 iniciar();
@@ -238,7 +264,46 @@ public class Main {
     }
     
     public static void editarDisciplina(int indiceDisciplina){
+        Scanner scanner = new Scanner(System.in);
+        JSONObject disciplina = listaDisciplinas.getJSONObject(indiceDisciplina);
+        System.out.println("\nDigite o novo nome da disciplina:\n");
+        String nome = null;
+        do{
+            nome = scanner.nextLine();
+            if(nome.isEmpty()){
+                System.out.println("\nPor favor, digite um nome válido.\n");
+            }
+        }while(nome.isEmpty());
         
+        System.out.println("\nDigite a nova descrição:\n");
+        String descricao = null;
+        do{
+            descricao = scanner.nextLine();
+            if(descricao.isEmpty()){
+                System.out.println("\nPor favor, digite uma descrição válida.\n");
+            }
+        }while(descricao.isEmpty());
+        
+        System.out.println("\nDigite a nova carga horária:\n");
+        int carga = -1;
+        
+        do{
+            try{
+                carga = Integer.valueOf(scanner.nextLine());
+            }catch(NumberFormatException e){};
+            if(carga <= 0){
+                System.out.println("\nPor favor digite um valor válido:\n");
+            }
+        }while(carga <= 0);
+        
+        disciplina.put(Contract.NOME, nome);
+        disciplina.put(Contract.DESCRICAO, descricao);
+        disciplina.put(Contract.CARGA_HORARIA, carga);
+        
+        listaDisciplinas.put(indiceDisciplina,disciplina);
+        System.out.println("\nAtualizado com sucesso\n");
+        regravrarDisciplinas();
+        iniciar();
     }
     
     public static void selecionarItemEmentaEditado(int indiceDisciplina){
@@ -362,6 +427,7 @@ public class Main {
         
         obj.put("nome",d.getNome());
         obj.put(Contract.CARGA_HORARIA,d.getCargaHoraria());
+        obj.put(Contract.DESCRICAO,d.getDescricao());
         obj.put(Contract.NOME, d.getNome());
         JSONArray itens = new JSONArray();
         if(d.getItens().size() > 0){

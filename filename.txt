@@ -1,1 +1,1 @@
-[{"carga_horaria":10,"itens_de_ementa":[{"carga_horaria":10,"nome":"teste"}],"nome":"bla"},{"carga_horaria":32,"itens_de_ementa":[{"carga_horaria":16,"nome":"bla"}],"nome":"bla"}]
+[]
