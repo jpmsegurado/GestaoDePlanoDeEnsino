@@ -21,31 +21,33 @@ import org.json.JSONObject;
 public class Main {
     
 
-    private static JSONArray listaDisciplinas = new JSONArray();
+    private static JSONArray listaDisciplinas = new JSONArray(); // Array utilizado para apresentar as disciplinas
     
     public static void main(String[] args) {
-        System.out.println("Seja bem vindo ao Sistema de gestão de plano de ensino.\n");
+        System.out.println("Seja bem vindo ao gerenciador de plano de ensino.\n");
         iniciar();
     }
     
-    public static void iniciar(){
-        listaDisciplinas = getAllDisciplinas();
-        System.out.println("\n\nPor favor selecione uma opção:\n"
-                + "1 - cadastrar disciplina\n"
-                + "2 - listar disciplinas\n"
-                + "3 - editar disciplina\n"
-                + "4 - remover disciplina\n"
-                + "5 - gerar plano de ensino\n"
-                + "6 - sair\n");
+    public static void iniciar(){ // Método que se repete várias vezes durante a execução do programa, sendo utilizado como uma interface principal por linha de comando"
+        
+        listaDisciplinas = getAllDisciplinas(); //Pega todas as disciplinas que já estavam salvas anteriormente, fazendo uso de um array JSON.
+        System.out.println("\nPor favor selecione uma opção:\n"
+                + "1 - Cadastrar disciplina\n"
+                + "2 - Listar disciplinas\n"
+                + "3 - Editar disciplina\n"
+                + "4 - Remover disciplina\n"
+                + "5 - Gerar plano de ensino\n"
+                + "6 - SAIR\n");
         
         Scanner scanner = new Scanner(System.in);
         String comando;
         int numeroComando = -1;
         
-        try {
+        try { // Tenta transformar um inteiro numa string, caso não conseguir gera uma exceção!
             comando = scanner.nextLine();
             numeroComando = Integer.parseInt(comando);
         } catch (NumberFormatException e) {
+            System.out.println("\n\nDigite um número válido!\n\n");
         }
         
         switch(numeroComando){
@@ -60,22 +62,23 @@ public class Main {
                 listarDisciplinas(true);
                 break;
             case 6:
+                System.out.println("\n\nSaindo...\n\n");
                 return;
             default:
-                System.out.println("\n\nPor favor digite um comando válido...\n\n");
+                System.out.println("\n\nERRO: Por favor digite um comando válido...\n\n");
                 iniciar();
                 break;
         }
         
     }
     
-    public static void cadastrarDisciplina(){
+    public static void cadastrarDisciplina(){ // Cadastra uma disciplina com seus itens de ementa, fazendo a validação da carga horária dos itens com a carga horária total da disciplina
         System.out.println("\nNome da disciplina:\n");
         Scanner scanner = new Scanner(System.in);
         String nome = scanner.nextLine();
         
         while(nome.isEmpty()){
-            System.out.println("\n\nPor favor digite um nome válido...\n\n");
+            System.out.println("\n\nERRO: Por favor, digite um nome válido!\n\n");
             nome = scanner.nextLine();
         }
         
@@ -83,7 +86,7 @@ public class Main {
         String descricao = scanner.nextLine();
         
         while(descricao.isEmpty()){
-            System.out.println("\n\nPor favor digite uma descrição válido...\n\n");
+            System.out.println("\n\nERRO: Por favor, digite uma descrição válida!\n\n");
             descricao = scanner.nextLine();
         }
         
@@ -94,32 +97,33 @@ public class Main {
             try {
                 cargaHoraria = Integer.parseInt(carga);
             } catch (NumberFormatException e){
-                System.out.println("\n\nPor favor digite uma carga horária válida...\n\n");
+                System.out.println("\n\nERRO: Por favor, digite uma carga horária válida!\n\n");
             }
         }while(cargaHoraria <= 0);
         
         int cargaTotal = 0;
-        ArrayList<ItemDeEmenta> ementa = new ArrayList<>();
+        ArrayList<ItemDeEmenta> ementa = new ArrayList<>(); //Array que contém os itens de ementa de uma disciplina
         do{
             cargaTotal = 0;
             ementa = retornaItensDeEmenta(cargaHoraria);
             
             for( int posicao = 0; posicao < ementa.size(); posicao++ ){
-                cargaTotal += ementa.get(posicao).getCargaHoraria();
+                cargaTotal += ementa.get(posicao).getCargaHoraria(); //soma todas as cargas dos itens
             }
-            if(cargaTotal > cargaHoraria){
-                System.out.println("\nA soma da carga horária dos itens de ementa"
-                        + " é maior que a carga horária da disciplina. ");
+            
+            if(cargaTotal > cargaHoraria){ //Validação da CH dos itens com a CH da disciplina
+                System.out.println("\nERRO: A soma da carga horária dos itens de ementa"
+                        + " é maior que a carga horária da disciplina.\n" + "\nPor favor, cadastre novamente!\n");
             }else if(cargaTotal < cargaHoraria){
-                System.out.println("\nA soma da carga horária dos itens de ementa"
-                        + " é menor que a carga horária da disciplina. ");
+                System.out.println("\nERRO: A soma da carga horária dos itens de ementa"
+                        + " é menor que a carga horária da disciplina.\n" + "\nPor favor, cadastre novamente!\n");
             }
         }while(cargaTotal != cargaHoraria || cargaTotal == 0);
         
         ArrayList<LivroDeReferencia> bibliografia = retornaBibliografia();
         
-        Disciplina disciplina = new Disciplina(nome,descricao,cargaHoraria,ementa,bibliografia);
-        salvarDisciplina(disciplina);
+        Disciplina disciplina = new Disciplina(nome,descricao,cargaHoraria,ementa,bibliografia); //Cria disciplina
+        salvarDisciplina(disciplina);// chama o método que salva a disciplina, mesmo após o término da execução do programa.
         iniciar();
         
     }
@@ -147,7 +151,7 @@ public class Main {
                 deletarDisciplina();
             }
         }else{
-            System.out.println("\n\nNenhuma disciplina cadastrada \n\n");
+            System.out.println("\n\nERRO: Nenhuma foi disciplina cadastrada! \n\n");
             iniciar();
         }
         
@@ -163,7 +167,7 @@ public class Main {
                 ordem = Integer.valueOf(scanner.nextLine());
             }catch(NumberFormatException e){}
             if(ordem <= 0 || ordem > listaDisciplinas.length()){
-                System.out.println("\nPor favor, digite um valor válido\n");
+                System.out.println("\nERRO: Por favor, digite um valor válido\n");
             }
         }while(ordem <= 0 || ordem > listaDisciplinas.length());
         listaDisciplinas.remove(ordem - 1);
@@ -179,7 +183,7 @@ public class Main {
                 ordem = Integer.valueOf(scanner.nextLine());
             }catch(NumberFormatException e){}
             if(ordem <= 0 || ordem > listaDisciplinas.length()){
-                System.out.println("\nPor favor, digite um valor válido\n");
+                System.out.println("\nERRO: Por favor, digite um valor válido\n");
             }
         }while(ordem <= 0 || ordem > listaDisciplinas.length());
         imprimirDisciplina(ordem - 1);
@@ -222,7 +226,7 @@ public class Main {
                 comando = Integer.valueOf(scanner.nextLine());
             }catch (NumberFormatException e) {}
             if(comando <= 0 || comando > 4){
-                System.out.println("Por favor digite um comando válido.");
+                System.out.println("ERRO: Por favor digite um comando válido.");
             }
         }while(comando <= 0 || comando > 4);
         
@@ -252,7 +256,7 @@ public class Main {
                 ordem = Integer.valueOf(scanner.nextLine());
             }catch(NumberFormatException e){};
             if(ordem <= 0){
-                System.out.println("\nPor favor digite um valor válido:\n");
+                System.out.println("\nERRO: Por favor, digite um valor válido!\n");
             }
         }while(ordem <= 0);
         JSONObject novaDisciplina = listaDisciplinas.getJSONObject(indiceDisciplina);
@@ -271,7 +275,7 @@ public class Main {
         do{
             nome = scanner.nextLine();
             if(nome.isEmpty()){
-                System.out.println("\nPor favor, digite um nome válido.\n");
+                System.out.println("\nERRO: Por favor, digite um nome válido!\n");
             }
         }while(nome.isEmpty());
         
@@ -280,7 +284,7 @@ public class Main {
         do{
             descricao = scanner.nextLine();
             if(descricao.isEmpty()){
-                System.out.println("\nPor favor, digite uma descrição válida.\n");
+                System.out.println("\nERRO: Por favor, digite uma descrição válida!\n");
             }
         }while(descricao.isEmpty());
         
@@ -292,7 +296,7 @@ public class Main {
                 carga = Integer.valueOf(scanner.nextLine());
             }catch(NumberFormatException e){};
             if(carga <= 0){
-                System.out.println("\nPor favor digite um valor válido:\n");
+                System.out.println("\nERRO: Por favor, digite um valor válido!\n");
             }
         }while(carga <= 0);
         
@@ -314,7 +318,7 @@ public class Main {
         
         System.out.println(text.toString());
         int comando = -1;
-        System.out.println("Por favor, digite o número de qual item de ementa deseja editar:");
+        System.out.println("ERRO: Por favor, digite o número de qual item de ementa deseja editar:");
         do{
             Scanner scanner = new Scanner(System.in);   
             try{
@@ -322,7 +326,7 @@ public class Main {
             }catch(NumberFormatException e){};
             
             if(comando <= 0 || comando > disciplina.getJSONArray(Contract.ITENS_DE_EMENTA).length()){
-                System.out.println("\nPor favor, digite um valor válido\n");
+                System.out.println("\nERRO: Por favor, digite um valor válido!\n");
             }
             
         }while(comando <= 0 || comando > disciplina.getJSONArray(Contract.ITENS_DE_EMENTA).length());
@@ -340,7 +344,7 @@ public class Main {
         do{
             nome = scanner.nextLine();
             if(nome.isEmpty()){
-                System.out.println("\nPor favor digite um nome válido");
+                System.out.println("\nERRO: Por favor, digite um nome válido");
             }
         }while(nome.isEmpty());
         
@@ -349,9 +353,9 @@ public class Main {
         do{
             carga = Integer.valueOf(scanner.nextLine());
             if(carga <= 0){
-                System.out.println("\nPor favor digite um valor válido.");
+                System.out.println("\nERRO: Por favor, digite um valor válido.");
             }else if(carga > disciplina.getInt(Contract.CARGA_HORARIA)){
-                System.out.println("\nO valor da carga é maior que a carga da disciplina, tente novamnte:\n");
+                System.out.println("\nERRO: O valor da carga do item é maior que a carga da disciplina, tente novamente:\n");
                 carga = -1;
             }else{
                 int cargaTotal = 0;
@@ -367,7 +371,7 @@ public class Main {
                 
                 if(cargaTotal > disciplina.getInt(Contract.CARGA_HORARIA)){
                     carga = -1;
-                    System.out.println("\nO A soma das cargas horárias dos itens de ementa é maior que a carga da disciplina, tente novamnte:\n");
+                    System.out.println("\nERRO: A soma das cargas horárias dos itens de ementa é maior que a carga da disciplina, tente novamnte:\n");
                 }
             }
         }while(carga <= 0);
@@ -463,7 +467,7 @@ public class Main {
     }
     
     public static ArrayList<ItemDeEmenta> retornaItensDeEmenta(int cargaHoraria){
-        System.out.println("\nCadastando os itens de ementa\n");
+        System.out.println("\nCADASTRANDO ITENS DE EMENTA: \n");
         ArrayList<ItemDeEmenta> ementa = new ArrayList<>();
         int comando = -1;
         Scanner scanner = new Scanner(System.in);
@@ -509,7 +513,7 @@ public class Main {
         do{
             nome = scanner.nextLine();
             if(nome.isEmpty()){
-                System.out.println("\n\n Por favor digite um nome válido...\n\n");
+                System.out.println("\n\n ERRO: Por favor, digite um nome válido: \n\n");
             }
         }while(nome.isEmpty());
         
@@ -518,7 +522,7 @@ public class Main {
         do{
             autor = scanner.nextLine();
             if(autor.isEmpty()){
-                System.out.println("\n\n Por favor digite um nome válido...\n\n");
+                System.out.println("\n\nERRO: Por favor, digite um nome válido.\n\n");
             }
         }while(autor.isEmpty());
         
@@ -528,7 +532,7 @@ public class Main {
         do{
             editora = scanner.nextLine();
             if(editora.isEmpty()){
-                System.out.println("\n\n Por favor digite um nome válido...\n\n");
+                System.out.println("\n\nERRO: Por favor, digite um nome válido.\n\n");
             }
         }while(editora.isEmpty());
         
@@ -541,7 +545,7 @@ public class Main {
             try {
                 numeroEdicao = Integer.parseInt(edicao);
             } catch (NumberFormatException e){
-                System.out.println("\n\nPor favor digite uma carga horária válida...\n\n");
+                System.out.println("\n\nERRO: Por favor, digite uma carga horária válida...\n\n");
             }
         }while(numeroEdicao <= 0);
         
@@ -559,7 +563,7 @@ public class Main {
         do{
             nome = scanner.nextLine();
             if(nome.isEmpty()){
-                System.out.println("\n\n Por favor digite um nome válido...\n\n");
+                System.out.println("\n\n ERRO: Por favor, digite um nome válido...\n\n");
             }
         }while(nome.isEmpty());
         
@@ -572,7 +576,7 @@ public class Main {
             try {
                 cargaHorari = Integer.parseInt(carga);
             } catch (NumberFormatException e){
-                System.out.println("\n\nPor favor digite uma carga horária válida...\n\n");
+                System.out.println("\n\nERRO: Por favor, digite uma carga horária válida...\n\n");
             }
         }while(cargaHorari <= 0);
         
@@ -584,4 +588,3 @@ public class Main {
     }
     
 }
-
