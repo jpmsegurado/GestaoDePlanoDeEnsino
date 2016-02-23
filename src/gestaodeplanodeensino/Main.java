@@ -100,33 +100,84 @@ public class Main {
             }
         } while (cargaHoraria <= 0);
 
-        int cargaTotal = 0;
-        ArrayList<ItemDeEmenta> ementa = new ArrayList<>(); //Array que contém os itens de ementa de uma disciplina
-        do {
-            cargaTotal = 0;
-            ementa = retornaItensDeEmenta(cargaHoraria);
+        
 
-            for (int posicao = 0; posicao < ementa.size(); posicao++) {
-                cargaTotal += ementa.get(posicao).getCargaHoraria(); //soma todas as cargas dos itens
-            }
-
-            if (cargaTotal > cargaHoraria) { //Validação da CH dos itens com a CH da disciplina
-                System.out.println("\nERRO: A soma da carga horária dos itens de ementa"
-                        + " é maior que a carga horária da disciplina.\n" + "\nPor favor, cadastre novamente!\n");
-            } else if (cargaTotal < cargaHoraria) {
-                System.out.println("\nERRO: A soma da carga horária dos itens de ementa"
-                        + " é menor que a carga horária da disciplina.\n" + "\nPor favor, cadastre novamente!\n");
-            }
-        } while (cargaTotal != cargaHoraria || cargaTotal == 0);
-
-        ArrayList<LivroDeReferencia> bibliografia = retornaBibliografia();
-
-        Disciplina disciplina = new Disciplina(nome, descricao, cargaHoraria, ementa, bibliografia); //Cria disciplina
+        Disciplina disciplina = new Disciplina(nome, descricao, cargaHoraria, null, null); //Cria disciplina
         salvarDisciplina(disciplina);// chama o método que salva a disciplina, mesmo após o término da execução do programa.
         iniciar();
 
     }
+    
+    public static void adicionarItensDeEmenta(int indiceDisciplina){
+        JSONObject disciplina = listaDisciplinas.getJSONObject(indiceDisciplina);
+        int cargaHoraria = disciplina.getInt(Contract.CARGA_HORARIA);
+        int cargaTotal = 0;
+        ArrayList<ItemDeEmenta> ementa = new ArrayList<>(); //Array que contém os itens de ementa de uma disciplina
 
+        cargaTotal = 0;
+        ementa = retornaItensDeEmenta(cargaHoraria);
+        JSONArray arrayEmenta = new JSONArray();
+        for(int i=0; i<ementa.size();i++){
+            JSONObject newItem = new JSONObject();
+            newItem.put(Contract.CARGA_HORARIA, ementa.get(i).getCargaHoraria());
+            newItem.put(Contract.NOME, ementa.get(i).getNome());
+            arrayEmenta.put(newItem);
+        }
+        disciplina.put(Contract.ITENS_DE_EMENTA, arrayEmenta);
+        regravrarDisciplinas();
+        imprimirDisciplina(indiceDisciplina);
+    }
+    
+    public static void cadastrarBibliografia(int indiceDisciplina){
+        JSONObject disciplina = listaDisciplinas.getJSONObject(indiceDisciplina);        
+        ArrayList<LivroDeReferencia> bibliografia = retornaBibliografia();
+        JSONArray arrayLivros;
+        
+        if(disciplina.getJSONArray(Contract.BIBLIOGRAFIA) != null){
+            if(disciplina.getJSONArray(Contract.BIBLIOGRAFIA).length() > 0){
+                arrayLivros = disciplina.getJSONArray(Contract.BIBLIOGRAFIA);
+            }else{
+                arrayLivros = new JSONArray();
+            }
+        }else{
+            arrayLivros = new JSONArray();
+        }
+        
+        for(int i=0; i<bibliografia.size();i++){
+            JSONObject newObj = new JSONObject();
+            newObj.put(Contract.NOME_LIVRO,bibliografia.get(i).getNome());
+            newObj.put(Contract.NOME_AUTOR,bibliografia.get(i).getAutor());
+            newObj.put(Contract.NOME_EDITORA,bibliografia.get(i).getEditora());
+            newObj.put(Contract.EDICAO,bibliografia.get(i).getEdicao());
+            arrayLivros.put(newObj);
+        }
+        
+        disciplina.put(Contract.BIBLIOGRAFIA, arrayLivros);
+        listaDisciplinas.put(indiceDisciplina,disciplina);
+        regravrarDisciplinas();
+        imprimirDisciplina(indiceDisciplina);
+    }
+
+    public static void removerLivro(int indiceDisciplina){
+        System.out.println("\nDigite o índice do livro:");
+        Scanner scanner = new Scanner(System.in);
+        int indiceLivro = -1;
+        do{
+            try {
+                indiceLivro = Integer.valueOf(scanner.next());
+                if(indiceLivro <= 0){
+                    System.out.println("\nERRO: Por favor digite um valor válido\n");
+                }
+            } catch (NumberFormatException e) {}
+        }while(indiceLivro <= 0);
+        JSONObject disciplina = listaDisciplinas.getJSONObject(indiceDisciplina);
+        disciplina.getJSONArray(Contract.BIBLIOGRAFIA).remove(indiceLivro - 1);
+        listaDisciplinas.put(indiceDisciplina, disciplina);
+        
+        System.out.println("\nRemovido com sucesso.\n");
+        regravrarDisciplinas();
+        imprimirDisciplina(indiceDisciplina);
+    }
     public static void listarDisciplinas(boolean canDelete) {
         if (listaDisciplinas.length() > 0) {
             StringBuilder text = new StringBuilder();
@@ -195,43 +246,47 @@ public class Main {
     ;
     
     public static void imprimirDisciplina(int ordem) {
-        JSONObject disciplina = listaDisciplinas.getJSONObject(ordem);
-        JSONArray itensDeEmenta = disciplina.getJSONArray(Contract.ITENS_DE_EMENTA);
-        JSONArray bibliografia = disciplina.getJSONArray(Contract.BIBLIOGRAFIA);
+        JSONObject disciplina = listaDisciplinas.optJSONObject(ordem);
+        JSONArray itensDeEmenta = disciplina.optJSONArray(Contract.ITENS_DE_EMENTA);
+        JSONArray bibliografia = disciplina.optJSONArray(Contract.BIBLIOGRAFIA);
         StringBuilder text = new StringBuilder();
         text.append("\n\nNome da disciplina: ").append(disciplina.get(Contract.NOME));
         text.append("\nCarga horária da disciplina: ")
                 .append(disciplina.get(Contract.CARGA_HORARIA))
-                .append("h");
-        if (itensDeEmenta.length() > 0) {
-            text.append("\n\nItens de ementa:");
-            for (int i = 0; i < itensDeEmenta.length(); i++) {
-                text.append("\n---------------------------------------------------");
-                text.append("\nItem de ementa ").append(i + 1);
-                text.append("\nNome do item: ").append(itensDeEmenta.getJSONObject(i).get(Contract.NOME));
-                text.append("\nCarga horária: ")
-                        .append(itensDeEmenta.getJSONObject(i).get(Contract.CARGA_HORARIA))
-                        .append("h");
-                if (i == itensDeEmenta.length() - 1) {
-                    text.append("\n---------------------------------------------------\n");
+                .append("h\n");
+        if(itensDeEmenta != null){
+            if (itensDeEmenta.length() > 0) {
+                text.append("\n\nItens de ementa:");
+                for (int i = 0; i < itensDeEmenta.length(); i++) {
+                    text.append("\n---------------------------------------------------");
+                    text.append("\nItem de ementa ").append(i + 1);
+                    text.append("\nNome do item: ").append(itensDeEmenta.getJSONObject(i).get(Contract.NOME));
+                    text.append("\nCarga horária: ")
+                            .append(itensDeEmenta.getJSONObject(i).get(Contract.CARGA_HORARIA))
+                            .append("h");
+                    if (i == itensDeEmenta.length() - 1) {
+                        text.append("\n---------------------------------------------------\n");
+                    }
                 }
             }
         }
         
-        if (bibliografia.length() > 0) {
-            text.append("\n\nBibliografia:");
-            for (int i = 0; i < bibliografia.length(); i++) {
-                text.append("\n---------------------------------------------------");
-                text.append("\nLivro ").append(i + 1);
-                text.append("\nNome do livro: ").append(bibliografia.getJSONObject(i).get(Contract.NOME_LIVRO));
-                text.append("\nNome do autor: ").append(bibliografia.getJSONObject(i).get(Contract.NOME_AUTOR));
-                text.append("\nNome da editora: ").append(bibliografia.getJSONObject(i).get(Contract.NOME_EDITORA));
-                text.append("\nEdição: ").append(bibliografia.getJSONObject(i).get(Contract.EDICAO)).append("ª edição");
+        if(bibliografia != null){
+            if (bibliografia.length() > 0) {
+                text.append("\n\nBibliografia:");
+                for (int i = 0; i < bibliografia.length(); i++) {
+                    text.append("\n---------------------------------------------------");
+                    text.append("\nLivro ").append(i + 1);
+                    text.append("\nNome do livro: ").append(bibliografia.getJSONObject(i).get(Contract.NOME_LIVRO));
+                    text.append("\nNome do autor: ").append(bibliografia.getJSONObject(i).get(Contract.NOME_AUTOR));
+                    text.append("\nNome da editora: ").append(bibliografia.getJSONObject(i).get(Contract.NOME_EDITORA));
+                    text.append("\nEdição: ").append(bibliografia.getJSONObject(i).get(Contract.EDICAO)).append("ª edição");
 
 
 
-                if (i == itensDeEmenta.length() - 1) {
-                    text.append("\n---------------------------------------------------\n");
+                    if (i == bibliografia.length() - 1) {
+                        text.append("\n---------------------------------------------------\n");
+                    }
                 }
             }
         }
@@ -243,17 +298,20 @@ public class Main {
         System.out.println("Selecione uma opção:\n"
                 + "1 - editar item de ementa\n"
                 + "2 - deletar item de ementa\n"
-                + "3 - editar informações desta disciplina\n"
-                + "4 - voltar pro inicio\n");
+                + "3 - adicionar itens de ementa\n"
+                + "4 - editar informações desta disciplina\n"
+                + "5 - adicionar livro de bibliografia\n"
+                + "6 - remover livro de bibliografia\n"
+                + "7 - voltar pro inicio\n");
         do {
             try {
                 comando = Integer.valueOf(scanner.nextLine());
             } catch (NumberFormatException e) {
             }
-            if (comando <= 0 || comando > 4) {
+            if (comando <= 0 || comando > 7) {
                 System.out.println("ERRO: Por favor digite um comando válido.");
             }
-        } while (comando <= 0 || comando > 4);
+        } while (comando <= 0 || comando > 7);
 
         switch (comando) {
             case 1:
@@ -263,9 +321,21 @@ public class Main {
                 selecionarItemADeletar(ordem);
                 break;
             case 3:
-                editarDisciplina(ordem);
+                adicionarItensDeEmenta(ordem);
                 break;
             case 4:
+                editarDisciplina(ordem);
+                break;
+            case 5:
+                cadastrarBibliografia(ordem);
+                break;
+            case 6:
+                removerLivro(ordem);
+                break;
+            case 7:
+                iniciar();
+                break;
+            default:
                 iniciar();
                 break;
         }
@@ -345,7 +415,7 @@ public class Main {
 
         System.out.println(text.toString());
         int comando = -1;
-        System.out.println("ERRO: Por favor, digite o número de qual item de ementa deseja editar:");
+        System.out.println("\nPor favor, digite o número de qual item de ementa deseja editar:");
         do {
             Scanner scanner = new Scanner(System.in);
             try {
@@ -377,31 +447,10 @@ public class Main {
         } while (nome.isEmpty());
 
         int carga = -1;
-        System.out.println("Digite a nova carga horária do item de ementa:\n");
+        System.out.println("\nDigite a nova carga horária do item de ementa:\n");
         do {
             carga = Integer.valueOf(scanner.nextLine());
-            if (carga <= 0) {
-                System.out.println("\nERRO: Por favor, digite um valor válido.");
-            } else if (carga > disciplina.getInt(Contract.CARGA_HORARIA)) {
-                System.out.println("\nERRO: O valor da carga do item é maior que a carga da disciplina, tente novamente:\n");
-                carga = -1;
-            } else {
-                int cargaTotal = 0;
-                for (int i = 0; i < disciplina.getJSONArray(Contract.ITENS_DE_EMENTA).length(); i++) {
-                    if (i == indiceItemEmenta) {
-                        cargaTotal += carga;
-                    } else {
-                        cargaTotal += disciplina
-                                .getJSONArray(Contract.ITENS_DE_EMENTA)
-                                .getJSONObject(i).getInt(Contract.CARGA_HORARIA);
-                    }
-                }
-
-                if (cargaTotal > disciplina.getInt(Contract.CARGA_HORARIA)) {
-                    carga = -1;
-                    System.out.println("\nERRO: A soma das cargas horárias dos itens de ementa é maior que a carga da disciplina, tente novamnte:\n");
-                }
-            }
+            System.out.println("\nERRO: Por favor, digite um valor válido.");
         } while (carga <= 0);
 
         itemEmenta.put(Contract.CARGA_HORARIA, carga);
@@ -462,7 +511,7 @@ public class Main {
         obj.put(Contract.DESCRICAO, d.getDescricao());
         obj.put(Contract.NOME, d.getNome());
         JSONArray itens = new JSONArray();
-        if (d.getItens().size() > 0) {
+        /*if (d.getItens().size() > 0) {
             for (int i = 0; i < d.getItens().size(); i++) {
                 JSONObject newObj = new JSONObject();
                 ItemDeEmenta item = d.getItens().get(i);
@@ -489,7 +538,7 @@ public class Main {
         }
         obj.put(Contract.ITENS_DE_EMENTA, itens);
         obj.put(Contract.BIBLIOGRAFIA, livros);
-
+        */
         listaDisciplinas.put(obj);
 
         try {
