@@ -1,1 +1,1 @@
-[{"carga_horaria":64,"itens_de_ementa":[{"carga_horaria":32,"nome":"jp"},{"carga_horaria":32,"nome":"bla"},{"carga_horaria":32,"nome":"bla"}],"nome":"mds","bibliografia":[{"nome_livro":"bla","nome_editora":"bla","nome_autor":"bla","edicao":1}],"descricao":"metodos"}]
+[{"carga_horaria":12,"itens_de_ementa":[{"carga_horaria":6,"nome":"item 1"},{"carga_horaria":3,"nome":"item 2"},{"carga_horaria":3,"nome":"item 3"}],"nome":"bla","bibliografia":[{"nome_livro":"bd","nome_editora":"abril","nome_autor":"abril","edicao":2}],"descricao":"bla bla"}]

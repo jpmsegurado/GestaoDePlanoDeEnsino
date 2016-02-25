@@ -5,12 +5,22 @@ package gestaodeplanodeensino;
  * @author JoãoPedro
  */
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import jxl.*;
+import jxl.read.biff.BiffException;
+import jxl.write.Label;
+import jxl.write.WritableCell;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.WriteException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -60,6 +70,10 @@ public class Main {
             case 4:
                 listarDisciplinas(true);
                 break;
+            case 5:
+                gerarPlano();
+                break;
+                
             case 6:
                 System.out.println("\n\nSaindo...\n\n");
                 return;
@@ -112,11 +126,13 @@ public class Main {
         JSONObject disciplina = listaDisciplinas.getJSONObject(indiceDisciplina);
         int cargaHoraria = disciplina.getInt(Contract.CARGA_HORARIA);
         int cargaTotal = 0;
-        ArrayList<ItemDeEmenta> ementa = new ArrayList<>(); //Array que contém os itens de ementa de uma disciplina
-
+        ArrayList<ItemDeEmenta> ementa; //Array que contém os itens de ementa de uma disciplina
         cargaTotal = 0;
         ementa = retornaItensDeEmenta(cargaHoraria);
         JSONArray arrayEmenta = new JSONArray();
+        if(disciplina.optJSONArray(Contract.ITENS_DE_EMENTA) != null){
+            arrayEmenta = disciplina.getJSONArray(Contract.ITENS_DE_EMENTA);
+        }
         for(int i=0; i<ementa.size();i++){
             JSONObject newItem = new JSONObject();
             newItem.put(Contract.CARGA_HORARIA, ementa.get(i).getCargaHoraria());
@@ -133,7 +149,7 @@ public class Main {
         ArrayList<LivroDeReferencia> bibliografia = retornaBibliografia();
         JSONArray arrayLivros;
         
-        if(disciplina.getJSONArray(Contract.BIBLIOGRAFIA) != null){
+        if(disciplina.optJSONArray(Contract.BIBLIOGRAFIA) != null){
             if(disciplina.getJSONArray(Contract.BIBLIOGRAFIA).length() > 0){
                 arrayLivros = disciplina.getJSONArray(Contract.BIBLIOGRAFIA);
             }else{
@@ -164,7 +180,7 @@ public class Main {
         int indiceLivro = -1;
         do{
             try {
-                indiceLivro = Integer.valueOf(scanner.next());
+                indiceLivro = Integer.valueOf(scanner.nextLine());
                 if(indiceLivro <= 0){
                     System.out.println("\nERRO: Por favor digite um valor válido\n");
                 }
@@ -598,7 +614,149 @@ public class Main {
         return biblbiografia;
     }
 
-    public static LivroDeReferencia cadastrarLivro() {
+    public static void gerarPlano() {
+        
+        int comando = -1;
+        Scanner scanner = new Scanner(System.in);
+        ArrayList<Integer> dias = new ArrayList<>();
+        ArrayList<Integer> carga = new ArrayList<>();
+        do{
+            dias.add(retornaDiaDisciplina(dias));
+            carga.add(retornaHorasAula());
+            System.out.println("\nDeseja adicionar mais dias?\n1 - sim\n2 - não");
+            try{
+                comando = Integer.valueOf(scanner.nextLine());
+            }catch(NumberFormatException e){};
+        }while(comando == 1);
+        
+        ArrayList<String> listaDias = new ArrayList<>();
+        
+        for(int i=0;i<dias.size();i++){
+            int cargaDoDia = carga.get(i);
+            
+            for(int j=1;j<=cargaDoDia;j++){
+                switch(dias.get(i)){
+                    case 1:
+                        listaDias.add("segunda "+j+"ª hora");
+                        break;
+                    case 2:
+                        listaDias.add("terça "+j+"ª hora");
+                        break;
+                    case 3:
+                        listaDias.add("quarta "+j+"ª hora");
+                        break;
+                    case 4:
+                        listaDias.add("quinta "+j+"ª hora");
+                        break;
+                    case 5:
+                        listaDias.add("sexta "+j+"ª hora");
+                        break;
+                    case 6:
+                        listaDias.add("sábado "+j+"ª hora");
+                        break;
+                    case 7:
+                        listaDias.add("domingo "+j+"ª hora");
+                        break;
+                    default:
+                        break;
+                }
+                
+            }
+        }
+        
+        
+        JSONObject disciplina = listaDisciplinas.getJSONObject(0);
+        
+        ArrayList<String> planilhaHeader = new ArrayList<>();
+        ArrayList<String> planilhaContent = new ArrayList<>();
+        
+        for(int j=0;j<disciplina.getInt(Contract.CARGA_HORARIA);j++){
+            planilhaHeader.add(listaDias.get(j%listaDias.size()));
+        }
+        for(int x=0; x<disciplina.getJSONArray(Contract.ITENS_DE_EMENTA).length();x++){
+            JSONObject item = disciplina.getJSONArray(Contract.ITENS_DE_EMENTA).getJSONObject(x);
+            for(int k=0; k<item.getInt(Contract.CARGA_HORARIA);k++){
+                planilhaContent.add(item.getString(Contract.NOME));
+            }
+        }
+        
+        
+        
+        try { 
+            WritableWorkbook workbook;
+            workbook = Workbook.createWorkbook(new File("Plano_de_ensino.xls"));
+            WritableSheet sheet = workbook.createSheet("First Sheet", 0);
+            int cont;
+            Label title = new Label(0,0,"Bibliografia");
+            sheet.addCell(title);
+            for(cont = 0;cont<disciplina.getJSONArray(Contract.BIBLIOGRAFIA).length();cont++){
+                JSONObject livro = disciplina.getJSONArray(Contract.BIBLIOGRAFIA).getJSONObject(cont);
+                Label label = new Label(0,cont+1,"Livro "+cont+1);
+                Label label2 = new Label(2,cont+1,livro.getString(Contract.NOME_LIVRO)+"/"+livro.getString(Contract.NOME_AUTOR));
+                sheet.addCell(label);
+                sheet.addCell(label2);
+            }
+            for(int i=0; i<planilhaHeader.size(); i++){
+                if(i==0){
+                    Label title2 = new Label(0,i+cont+3,"Itens de ementa");
+                    sheet.addCell(title2);
+                }
+                Label label = new Label(0,i+cont+4,planilhaHeader.get(i));
+                Label label2 = new Label(2, i+cont+4, planilhaContent.get(i));
+                sheet.addCell(label);
+                sheet.addCell(label2);
+            }
+            
+            workbook.write();
+            workbook.close();
+        } catch (IOException | WriteException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        iniciar();
+        
+    }
+    
+    public static int retornaDiaDisciplina(ArrayList<Integer> dias)                                     {
+        System.out.println("\nSelecione um dia para adicionar:");
+        for(int i=1;i<Contract.DIAS_SEMANA.length+1; i++){
+            if(!dias.contains(i)){
+                System.out.println(i+" - "+Contract.DIAS_SEMANA[i-1]);
+            }
+        }
+        Scanner scanner = new Scanner(System.in);
+        int dia = -1;
+        do{
+            try{
+                dia = Integer.valueOf(scanner.nextLine());
+                if(dias.contains(dia)){
+                    System.out.println("\nDia já cadastrado\n");
+                }else if(dia <= 0){
+                    System.out.println("\nPor favor digite um valor válido.\n");
+                }
+            }catch(NumberFormatException e){}
+        }while(dia <= 0 || dias.contains(dia));
+        
+        return dia;
+    };
+    
+    public static int retornaHorasAula(){
+        System.out.println("\nDigite a quantidade de horas-aula desse dia:");
+        Scanner scanner = new Scanner(System.in);
+        int horas = -1;
+        do{
+            try{
+                horas = Integer.valueOf(scanner.nextLine());
+                if(horas <= 0){
+                    System.out.println("\nPor favor digite um valor válido.\n");
+                }
+            }catch(NumberFormatException e){}
+        }while(horas <= 0);
+        
+        return horas;
+    }
+    
+    public static LivroDeReferencia cadastrarLivro(){
         System.out.println("\nDigite o nome do livro\n");
         Scanner scanner = new Scanner(System.in);
         String nome = null;

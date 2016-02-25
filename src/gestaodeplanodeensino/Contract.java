@@ -14,5 +14,14 @@ public class Contract {
     public final static String NOME_EDITORA = "nome_editora";
     public final static String NOME_AUTOR = "nome_autor";
     public final static String EDICAO = "edicao";
+    public final static String[] DIAS_SEMANA = new String[]{
+        "segunda",
+        "terça",
+        "quarta",
+        "quinta",
+        "sexta",
+        "sábado",
+        "domingo"
+    };
     
 }
