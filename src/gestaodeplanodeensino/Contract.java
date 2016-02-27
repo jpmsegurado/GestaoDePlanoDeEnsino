@@ -2,6 +2,7 @@ package gestaodeplanodeensino;
 
 public class Contract {
     
+    public final static String ID = "id";
     public final static String NOME = "nome";
     public final static String CARGA_HORARIA = "carga_horaria";
     public final static String DESCRICAO = "descricao";

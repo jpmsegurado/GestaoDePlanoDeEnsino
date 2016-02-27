@@ -13,20 +13,20 @@ import java.util.ArrayList;
  */
 public class Disciplina {
     
-    private String nome,descricao;
+    private String id,nome,descricao;
     private int cargaHoraria;
     private ArrayList<ItemDeEmenta> itens;
     private ArrayList<LivroDeReferencia> bibliografia;
 
-    public Disciplina(String nome, String descricao, int cargaHoraria, ArrayList<ItemDeEmenta> itens, ArrayList<LivroDeReferencia> bibliografia) {
+    public Disciplina(String id, String nome, String descricao, int cargaHoraria) {
+        this.id = id;
         this.nome = nome;
         this.descricao = descricao;
         this.cargaHoraria = cargaHoraria;
-        this.itens = itens;
-        this.bibliografia = bibliografia;
+        
     }
 
-    
+
     
     public ArrayList<ItemDeEmenta> getItens() {
         return itens;
@@ -42,6 +42,14 @@ public class Disciplina {
 
     public void setBibliografia(ArrayList<LivroDeReferencia> bibliografia) {
         this.bibliografia = bibliografia;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
     
     public String getNome() {
