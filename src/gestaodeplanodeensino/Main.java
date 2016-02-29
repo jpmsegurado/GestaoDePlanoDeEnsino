@@ -94,9 +94,17 @@ public class Main {
 
         do {
 
-            //fazer uma verificação para ver se há ids iguais - URGENTE
-            
             id = scanner.nextLine().toUpperCase();
+            
+            for(int i = 0; i<listaDisciplinas.length(); i++){
+               String idAComparar = (String) listaDisciplinas.getJSONObject(i).get(Contract.ID);
+                
+                if(id.equals(idAComparar)){
+                    System.out.println("A ID digitada já existe");
+                    cadastrarDisciplina();
+                }
+            }
+            
 
             if (id.isEmpty()) {
                 System.out.println("\n\nERRO: Por favor, digite uma ID válida!\n\n");
@@ -545,12 +553,14 @@ public class Main {
         } while (descricao.isEmpty());
 
         System.out.println("\nDigite a nova carga horária:\n");
+       
         int carga = -1;
 
         do {
             try {
-                carga = Integer.valueOf(scanner.nextLine());
+                carga = Integer.valueOf(scanner.next());
             } catch (NumberFormatException e) {
+                System.out.println("\nERRO: Por favor, digite um valor válido!\n");
             };
             if (carga <= 0) {
                 System.out.println("\nERRO: Por favor, digite um valor válido!\n");
