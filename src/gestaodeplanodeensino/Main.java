@@ -957,7 +957,7 @@ public class Main {
             for (cont = 0; cont < disciplina.getJSONArray(Contract.BIBLIOGRAFIA).length(); cont++) {
                 JSONObject livro = disciplina.getJSONArray(Contract.BIBLIOGRAFIA).getJSONObject(cont);
                 Label label = new Label(0, cont + 1, "Livro " + cont + 1);
-                Label label2 = new Label(2, cont + 1, livro.getString(Contract.NOME_LIVRO) + "/" + livro.getString(Contract.NOME_AUTOR));
+                Label label2 = new Label(2, cont + 1, livro.getString(Contract.NOME_LIVRO) + "/" + livro.getString(Contract.NOME_AUTOR)+ "/" + livro.getString(Contract.NOME_EDITORA));
                 sheet.addCell(label);
                 sheet.addCell(label2);
             }
@@ -1069,7 +1069,7 @@ public class Main {
             }
         } while (numeroEdicao <= 0);
 
-        LivroDeReferencia livro = new LivroDeReferencia(nome, editora, editora, numeroEdicao);
+        LivroDeReferencia livro = new LivroDeReferencia(nome, autor, editora, numeroEdicao);
         return livro;
 
     }
