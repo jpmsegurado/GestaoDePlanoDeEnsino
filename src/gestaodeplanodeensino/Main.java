@@ -800,8 +800,86 @@ public class Main {
 
         return biblbiografia;
     }
+    
+    public static int selecionarDisciplinaPararGerarPlano() {
+        
+        StringBuilder text = new StringBuilder();
+            text.append("\n---------------------------------------------------\n");
+            for (int i = 0; i < listaDisciplinas.length(); i++) {
+                text.append(i + 1).append("ª disciplina");
+                text.append("\nID: ").append(listaDisciplinas.getJSONObject(i).get(Contract.ID));
+                text.append("\nNome: ").append(listaDisciplinas.getJSONObject(i).get(Contract.NOME));
+                text.append("\nCarga horária: ")
+                        .append(listaDisciplinas.getJSONObject(i).get(Contract.CARGA_HORARIA))
+                        .append("h");
+
+                text.append("\nDescrição: ").append(listaDisciplinas.getJSONObject(i).get(Contract.DESCRICAO));
+
+                text.append("\n---------------------------------------------------\n");
+            }
+            
+        System.out.println(text.toString());
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Digite o ID da disciplina que deseja selecionar:");
+        String idDisciplina = "";
+        int ordem = -1;
+
+        try {
+            idDisciplina = scanner.nextLine().toUpperCase();
+            for (int i = 0; i < listaDisciplinas.length() + 1; i++) {
+
+                String idDisciplina1 = (String) listaDisciplinas.getJSONObject(i).get(Contract.ID);
+
+                if ((idDisciplina.equals(idDisciplina1))) {
+                    ordem = i;
+                    return ordem;
+                }
+            }
+
+        } catch (JSONException e) {
+        }
+        
+        return ordem;
+
+    }
 
     public static void gerarPlano() {
+        
+        int ordem = selecionarDisciplinaPararGerarPlano();
+        if(ordem == -1){
+            System.out.println("\nTente novamente, ID não encontrado!\n");
+            iniciar();
+            return;
+        }
+        
+        JSONObject disciplina = listaDisciplinas.getJSONObject(ordem);
+        
+        if(disciplina.optJSONArray(Contract.BIBLIOGRAFIA) != null && disciplina.optJSONArray(Contract.ITENS_DE_EMENTA) != null){
+            int cargaTotal = disciplina.getInt(Contract.CARGA_HORARIA);
+            int cargaItens = 0;
+            for(int i=0; i<disciplina.getJSONArray(Contract.ITENS_DE_EMENTA).length();i++){
+                cargaItens += disciplina.getJSONArray(Contract.ITENS_DE_EMENTA).getJSONObject(i).getInt(Contract.CARGA_HORARIA);
+            }
+            
+            if(cargaTotal != cargaItens){
+                System.out.println("\nCarga da disciplina: "+cargaTotal+"h");
+                System.out.println("\nCarga da itens de ementa: "+cargaItens+"h");
+                System.out.println("\nPor favor ajuste as cargas da disciplina e dos itens para que fiquem equivalentes");
+                iniciar();
+                return;
+            }
+            
+            
+            
+        }else if(disciplina.optJSONArray(Contract.BIBLIOGRAFIA) == null){
+            System.out.println("Por favor cadastre a bibliografia desta disciplina");
+            iniciar();
+            return;
+        }else if(disciplina.optJSONArray(Contract.ITENS_DE_EMENTA) == null){
+            System.out.println("Por favor cadastre os itens de ementa desta disciplina");
+            iniciar();
+            return;
+        }
 
         int comando = -1;
         Scanner scanner = new Scanner(System.in);
@@ -851,8 +929,6 @@ public class Main {
 
             }
         }
-
-        JSONObject disciplina = listaDisciplinas.getJSONObject(0);
 
         ArrayList<String> planilhaHeader = new ArrayList<>();
         ArrayList<String> planilhaContent = new ArrayList<>();

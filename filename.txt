@@ -1,0 +1,1 @@
+[{"carga_horaria":32,"itens_de_ementa":[{"carga_horaria":16,"nome":"item 1"}],"nome":"mds","id":"001","bibliografia":[{"nome_livro":"bd","nome_editora":"abril","nome_autor":"abril","edicao":2}],"descricao":"metodos de dev software"}]
