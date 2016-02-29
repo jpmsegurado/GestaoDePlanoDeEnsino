@@ -936,7 +936,7 @@ public class Main {
 
         ArrayList<String> planilhaHeader = new ArrayList<>();
         ArrayList<String> planilhaContent = new ArrayList<>();
-
+        
         for (int j = 0; j < disciplina.getInt(Contract.CARGA_HORARIA); j++) {
             planilhaHeader.add(listaDias.get(j % listaDias.size()));
         }
@@ -952,22 +952,26 @@ public class Main {
             workbook = Workbook.createWorkbook(new File("Plano_de_ensino.xls"));
             WritableSheet sheet = workbook.createSheet("First Sheet", 0);
             int cont;
-            Label title = new Label(0, 0, "Bibliografia");
+            Label nomeTituloDisciplina = new Label(0,0,"Nome da disciplina");
+            Label nomeValorDisciplina = new Label(2,0,disciplina.getString(Contract.NOME));
+            Label title = new Label(0, 2, "Bibliografia");
             sheet.addCell(title);
+            sheet.addCell(nomeTituloDisciplina);
+            sheet.addCell(nomeValorDisciplina);
             for (cont = 0; cont < disciplina.getJSONArray(Contract.BIBLIOGRAFIA).length(); cont++) {
                 JSONObject livro = disciplina.getJSONArray(Contract.BIBLIOGRAFIA).getJSONObject(cont);
-                Label label = new Label(0, cont + 1, "Livro " + cont + 1);
-                Label label2 = new Label(2, cont + 1, livro.getString(Contract.NOME_LIVRO) + "/" + livro.getString(Contract.NOME_AUTOR)+ "/" + livro.getString(Contract.NOME_EDITORA));
+                Label label = new Label(0, cont + 3, "Livro " + cont + 1);
+                Label label2 = new Label(2, cont + 3, livro.getString(Contract.NOME_LIVRO) + "/" + livro.getString(Contract.NOME_AUTOR)+ "/" + livro.getString(Contract.NOME_EDITORA));
                 sheet.addCell(label);
                 sheet.addCell(label2);
             }
             for (int i = 0; i < planilhaHeader.size(); i++) {
                 if (i == 0) {
-                    Label title2 = new Label(0, i + cont + 3, "Itens de ementa");
+                    Label title2 = new Label(0, i + cont + 5, "Itens de ementa");
                     sheet.addCell(title2);
                 }
-                Label label = new Label(0, i + cont + 4, planilhaHeader.get(i));
-                Label label2 = new Label(2, i + cont + 4, planilhaContent.get(i));
+                Label label = new Label(0, i + cont + 6, planilhaHeader.get(i));
+                Label label2 = new Label(2, i + cont + 6, planilhaContent.get(i));
                 sheet.addCell(label);
                 sheet.addCell(label2);
             }
