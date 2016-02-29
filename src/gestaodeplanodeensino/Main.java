@@ -867,6 +867,10 @@ public class Main {
                 System.out.println("\nPor favor ajuste as cargas da disciplina e dos itens para que fiquem equivalentes");
                 iniciar();
                 return;
+            }else if(disciplina.optJSONArray(Contract.BIBLIOGRAFIA).length() == 0){
+                System.out.println("\nPor favor cadastre a bibliografia desta disciplina");
+                iniciar();
+                return;
             }
             
             
