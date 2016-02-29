@@ -801,7 +801,7 @@ public class Main {
         return biblbiografia;
     }
     
-    public static int selecionarDisciplinaPararGerarPlano() {
+    public static int retornaIndiceDisciplinaPararGerarPlano() {
         
         StringBuilder text = new StringBuilder();
             text.append("\n---------------------------------------------------\n");
@@ -845,7 +845,7 @@ public class Main {
 
     public static void gerarPlano() {
         
-        int ordem = selecionarDisciplinaPararGerarPlano();
+        int ordem = retornaIndiceDisciplinaPararGerarPlano();
         if(ordem == -1){
             System.out.println("\nTente novamente, ID não encontrado!\n");
             iniciar();
